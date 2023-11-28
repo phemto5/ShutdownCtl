@@ -32,5 +32,5 @@ else {
             $AwakeComputers.Add("$address - $($otherdata.Destination)")
         }
     }
-    Invoke-WebRequest -Method Post -Body "$($AwakeComputers -join ",")) are awake" -Uri "ntfy.gamenight.dynu.net/client" -ErrorAction SilentlyContinue -InformationAction SilentlyContinue
+    Invoke-WebRequest -Method Post -Body "$(  ConvertTo-Json $AwakeComputers )) are awake" -Uri "ntfy.gamenight.dynu.net/client" -ErrorAction SilentlyContinue -InformationAction SilentlyContinue
 }
