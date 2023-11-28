@@ -12,7 +12,7 @@ if ($clientName) {
     if ($testResult) {
         $stopproc = Start-Process powershell -ArgumentList "Stop-Computer $comp -Verbose"
         Write-Host $stopproc.ToString()
-        Invoke-WebRequest -Body "$comp was shutdown" -Uri "ntfy.gamenight.dynu.net/client"
+        Invoke-WebRequest -Method Post -Body "$comp was shutdown" -Uri "ntfy.gamenight.dynu.net/client"
     }
     else {
         Write-Host "$comp is not responding" -ForegroundColor Red 
@@ -32,5 +32,5 @@ else {
             $AwakeComputers.Add("$address - $($otherdata.Destination)")
         }
     }
-    Invoke-WebRequest -Body "$($AwakeComputers -join ",")) are awake" -Uri "ntfy.gamenight.dynu.net/client" -ErrorAction SilentlyContinue -InformationAction SilentlyContinue
+    Invoke-WebRequest -Method Post -Body "$($AwakeComputers -join ",")) are awake" -Uri "ntfy.gamenight.dynu.net/client" -ErrorAction SilentlyContinue -InformationAction SilentlyContinue
 }
