@@ -3,23 +3,34 @@
 Param(
     [Parameter()]
     [string]
-    $clientName
+    $clientName,
+    [Parameter()]
+    [bool]
+    $All = $false,
+    [Parameter()]
+    [bool]
+    $Search = $false
 )
-# powershell
-if ($clientName) {
-    $comp = $clientName
-    $testResult = Test-Connection -IPv4 -TcpPort 8985 -TargetName $comp -ErrorVariable $testResult -Quiet  
+$compusers =@("hplapy.anderson.local","")
+function RemoteShutdown {
+    param (
+        $comp
+    )
+    $testResult = Test-Connection -IPv4 -TargetName $comp -ErrorVariable $testResult -Quiet  
     if ($testResult) {
-        $stopproc = Start-Process powershell -ArgumentList "Stop-Computer $comp -Verbose"
-        Write-Host $stopproc.ToString()
-        Invoke-WebRequest -Method Post -Body "$comp was shutdown" -Uri "ntfy.gamenight.dynu.net/client"
+        Start-Process -NoNewWindow -FilePath powershell -ArgumentList "Stop-Computer $comp -Verbose" 
+        # Write-Host $stopproc.ToString()
+        Invoke-WebRequest -Method Post -Body "$comp was shutdown" -Uri "ntfy.gamenight.dynu.net/client" -OutFile "resp.json" 
+        # Invoke-Item .\resp.json
     }
     else {
-        Write-Host "$comp is not responding" -ForegroundColor Red 
-        Write-Host $testResult
+        Write-Host "Test result as $testResult so $comp is not responding" -ForegroundColor Red 
+        # Write-Host $testResult??
     }
 }
-else {
+
+function SeachAll {
+    
     $AwakeComputers = [System.Collections.ArrayList]::new()
     for ($i = 50; $i -lt 249; ++$i) {
         $address = "192.168.1.$i"
@@ -33,4 +44,19 @@ else {
         }
     }
     Invoke-WebRequest -Method Post -Body "$(  ConvertTo-Json $AwakeComputers )) are awake" -Uri "ntfy.gamenight.dynu.net/client" -ErrorAction SilentlyContinue -InformationAction SilentlyContinue
+}
+if ($All) {
+    foreach ($comp in $compusers) {
+        RemoteShutdown($comp )
+    }
+}
+else {
+    if ($Search) {
+        SeachAll
+    }
+    else {
+        if ($clientName) {
+            RemoteShutdown($clientName )
+        }
+    }
 }
